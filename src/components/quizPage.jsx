@@ -2,6 +2,7 @@ import React from "react";
 import Quiz from "./quizComponent";
 import axios from "axios";
 import he from "he";
+import { nanoid } from "nanoid";
 
 function shuffle(array) {
   let currentIndex = array.length,
@@ -20,6 +21,7 @@ function shuffle(array) {
 export default function QuizPage() {
   const [apiData, setApiData] = React.useState([]);
   const [dataFound, setDataFound] = React.useState(false);
+  const [newData, setNewData] = React.useState([]);
   React.useEffect(() => {
     axios
       .get(
@@ -29,34 +31,75 @@ export default function QuizPage() {
         if (res.data.response_code === 0) {
           setDataFound(true);
           return setApiData(res.data.results);
-        } else {
-          console.log("no Data Found");
         }
       });
   }, []);
   if (dataFound) {
     let apiDataObject = apiData.map((Element) => {
       return {
-        question: he.decode(Element.question),
-        correctAnswer: he.decode(Element.correct_answer),
+        question: { value: he.decode(Element.question), id: nanoid() },
+        correctAnswer: {
+          value: he.decode(Element.correct_answer),
+          id: nanoid(),
+        },
         option: shuffle([
-          he.decode(Element.correct_answer),
-          he.decode(Element.incorrect_answers[0]),
-          he.decode(Element.incorrect_answers[1]),
-          he.decode(Element.incorrect_answers[2]),
+          {
+            value: he.decode(Element.correct_answer),
+            id: nanoid(),
+            selected: false,
+          },
+          {
+            value: he.decode(Element.incorrect_answers[0]),
+            id: nanoid(),
+            selected: false,
+          },
+          {
+            value: he.decode(Element.incorrect_answers[1]),
+            id: nanoid(),
+            selected: false,
+          },
+          {
+            value: he.decode(Element.incorrect_answers[2]),
+            id: nanoid(),
+            selected: false,
+          },
         ]),
       };
     });
+    function handleClick(qid, id) {
+      apiDataObject.forEach((e) => {
+        if (e.question.id === qid) {
+          e.option.forEach((o) => {
+            if (o.id === id) {
+              console.log(o.value);
+              o.selected = true;
+            } else {
+              o.selected = false;
+            }
+          });
+        }
+      });
+
+      setNewData(apiDataObject);
+    }
+    console.log("rendered");
     console.log(apiDataObject);
+
+    // console.log(apiDataObject);
     return (
       <div className="container-quiz">
         <ol>
           {apiDataObject.map((e) => (
             <li>
-              <Quiz question={e.question} option={e.option} />
+              <Quiz
+                clickHandle={handleClick}
+                question={e.question}
+                option={e.option}
+              />
             </li>
           ))}
         </ol>
+        <button className="checkAnswer">Submit Your Answers </button>
       </div>
     );
   }
