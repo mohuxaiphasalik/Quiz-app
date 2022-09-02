@@ -4,43 +4,52 @@ export default function Quiz(props) {
     <div className="quiz" id={props.question.id}>
       <h3 className="question">{props.question.value}</h3>
       <div className="options">
-        <button
-          className={props.option.selected ? "option selected" : "option"}
+        <input
+          className="radio"
+          type="radio"
           id={props.option[0].id}
-          onClick={() =>
-            props.clickHandle(props.question.id, props.option[0].id)
-          }
-        >
+          name={props.question.value}
+          value={props.option[0].value}
+          onChange={props.handleChange}
+        />
+        <label className="label" htmlFor={props.option[0].id}>
           {props.option[0].value}
-        </button>
-        <button
-          className={props.option.selected ? "option selected" : "option"}
-          onClick={() =>
-            props.clickHandle(props.question.id, props.option[1].id)
-          }
+        </label>
+        <input
+          className="radio"
+          type="radio"
           id={props.option[1].id}
-        >
+          name={props.question.value}
+          value={props.option[1].value}
+          onChange={props.handleChange}
+        />
+        <label className="label" htmlFor={props.option[1].id}>
           {props.option[1].value}
-        </button>
-        <button
-          className={props.option.selected ? "option selected" : "option"}
-          onClick={() =>
-            props.clickHandle(props.question.id, props.option[2].id)
-          }
+        </label>
+        <input
+          className="radio"
+          type="radio"
           id={props.option[2].id}
-        >
+          name={props.question.value}
+          value={props.option[2].value}
+          onChange={props.handleChange}
+        />
+        <label className="label" htmlFor={props.option[2].id}>
           {props.option[2].value}
-        </button>
-        <button
-          className={props.option.selected ? "option selected" : "option"}
-          onClick={() =>
-            props.clickHandle(props.question.id, props.option[3].id)
-          }
+        </label>
+        <input
+          className="radio"
+          type="radio"
           id={props.option[3].id}
-        >
+          name={props.question.value}
+          value={props.option[3].value}
+          onChange={props.handleChange}
+        />
+        <label className="label" htmlFor={props.option[3].id}>
           {props.option[3].value}
-        </button>
+        </label>
       </div>
+      <h1>{props.wrongAnswers}</h1>
     </div>
   );
 }

@@ -3,7 +3,6 @@ import Quiz from "./quizComponent";
 import axios from "axios";
 import he from "he";
 import { nanoid } from "nanoid";
-
 function shuffle(array) {
   let currentIndex = array.length,
     randomIndex;
@@ -15,27 +14,35 @@ function shuffle(array) {
       array[currentIndex],
     ];
   }
-
   return array;
 }
+let wrongAnswers = [];
 export default function QuizPage() {
-  const [apiData, setApiData] = React.useState([]);
-  const [dataFound, setDataFound] = React.useState(false);
-  const [newData, setNewData] = React.useState([]);
+  const [apiData, setApiData] = React.useState({});
+  // const [wrongAnswers, setWrongAnswer] = React.useState([]);
+  const [rerender, setRerender] = React.useState(false);
   React.useEffect(() => {
     axios
       .get(
         "https://opentdb.com/api.php?amount=5&category=21&difficulty=medium&type=multiple"
       )
-      .then((res) => {
-        if (res.data.response_code === 0) {
-          setDataFound(true);
-          return setApiData(res.data.results);
-        }
-      });
+      .then((res) => setApiData(res.data));
   }, []);
-  if (dataFound) {
-    let apiDataObject = apiData.map((Element) => {
+  function compareResult(a, b) {
+    wrongAnswers = [];
+    a.forEach((e, i) => {
+      if (e.answer !== b[i].answer) {
+        if (wrongAnswers.indexOf(i) === -1) {
+          wrongAnswers.push(i);
+        }
+      }
+    });
+    return wrongAnswers;
+  }
+  if (apiData.response_code === 0) {
+    let correctAnswers = [];
+    let userAnswers = [];
+    let apiDataObject = apiData.results.map((Element) => {
       return {
         question: { value: he.decode(Element.question), id: nanoid() },
         correctAnswer: {
@@ -66,40 +73,57 @@ export default function QuizPage() {
         ]),
       };
     });
-    function handleClick(qid, id) {
-      apiDataObject.forEach((e) => {
-        if (e.question.id === qid) {
-          e.option.forEach((o) => {
-            if (o.id === id) {
-              console.log(o.value);
-              o.selected = true;
-            } else {
-              o.selected = false;
-            }
-          });
+    apiDataObject.forEach((e) => {
+      correctAnswers.push({
+        question: e.question.value,
+        answer: e.correctAnswer.value,
+      });
+      userAnswers.push({
+        question: e.question.value,
+        answer: "",
+      });
+    });
+    console.log("Correct answers -> 1", correctAnswers);
+    function handleClick() {
+      compareResult(correctAnswers, userAnswers);
+      console.log(wrongAnswers);
+      setRerender((p) => !p);
+    }
+    function handleChange(e) {
+      userAnswers.forEach((i) => {
+        if (e.target.name === i.question) {
+          i.answer = e.target.value;
         }
       });
-
-      setNewData(apiDataObject);
     }
-    console.log("rendered");
-    console.log(apiDataObject);
+    console.log("rerender");
 
-    // console.log(apiDataObject);
     return (
       <div className="container-quiz">
         <ol>
-          {apiDataObject.map((e) => (
+          {apiDataObject.map((e, i) => (
             <li>
               <Quiz
-                clickHandle={handleClick}
                 question={e.question}
                 option={e.option}
+                handleChange={handleChange}
+                wrongAnswers={() => {
+                  if (
+                    wrongAnswers.indexOf(i) !== -1 &&
+                    wrongAnswers.length > 0
+                  ) {
+                    return userAnswers[i];
+                  } else {
+                    return "";
+                  }
+                }}
               />
             </li>
           ))}
         </ol>
-        <button className="checkAnswer">Submit Your Answers </button>
+        <button className="checkAnswer" onClick={handleClick}>
+          Submit Your Answers
+        </button>
       </div>
     );
   }
