@@ -16,63 +16,66 @@ function shuffle(array) {
   }
   return array;
 }
-let wrongAnswers = [];
+let apiDataObject = [];
+
+let correctAnswers = [];
+let userAnswers = [];
 export default function QuizPage() {
   const [apiData, setApiData] = React.useState({});
-  // const [wrongAnswers, setWrongAnswer] = React.useState([]);
   const [rerender, setRerender] = React.useState(false);
   React.useEffect(() => {
+    userAnswers = [];
+    correctAnswers = [];
     axios
       .get(
         "https://opentdb.com/api.php?amount=5&category=21&difficulty=medium&type=multiple"
       )
-      .then((res) => setApiData(res.data));
+      .then((res) => {
+        apiDataObject = res.data.results.map((Element) => {
+          return {
+            question: { value: he.decode(Element.question), id: nanoid() },
+            correctAnswer: {
+              value: he.decode(Element.correct_answer),
+              id: nanoid(),
+            },
+            option: shuffle([
+              {
+                value: he.decode(Element.correct_answer),
+                id: nanoid(),
+                selected: false,
+              },
+              {
+                value: he.decode(Element.incorrect_answers[0]),
+                id: nanoid(),
+                selected: false,
+              },
+              {
+                value: he.decode(Element.incorrect_answers[1]),
+                id: nanoid(),
+                selected: false,
+              },
+              {
+                value: he.decode(Element.incorrect_answers[2]),
+                id: nanoid(),
+                selected: false,
+              },
+            ]),
+          };
+        });
+
+        setApiData(res.data);
+      });
   }, []);
-  function compareResult(a, b) {
-    wrongAnswers = [];
-    a.forEach((e, i) => {
-      if (e.answer !== b[i].answer) {
-        if (wrongAnswers.indexOf(i) === -1) {
-          wrongAnswers.push(i);
-        }
+  function compareResult() {
+    correctAnswers.forEach((e, i) => {
+      if (e.answer !== userAnswers[i].answer) {
+        userAnswers[i].isWrong = true;
+      } else {
+        userAnswers[i].isWrong = false;
       }
     });
-    return wrongAnswers;
   }
   if (apiData.response_code === 0) {
-    let correctAnswers = [];
-    let userAnswers = [];
-    let apiDataObject = apiData.results.map((Element) => {
-      return {
-        question: { value: he.decode(Element.question), id: nanoid() },
-        correctAnswer: {
-          value: he.decode(Element.correct_answer),
-          id: nanoid(),
-        },
-        option: shuffle([
-          {
-            value: he.decode(Element.correct_answer),
-            id: nanoid(),
-            selected: false,
-          },
-          {
-            value: he.decode(Element.incorrect_answers[0]),
-            id: nanoid(),
-            selected: false,
-          },
-          {
-            value: he.decode(Element.incorrect_answers[1]),
-            id: nanoid(),
-            selected: false,
-          },
-          {
-            value: he.decode(Element.incorrect_answers[2]),
-            id: nanoid(),
-            selected: false,
-          },
-        ]),
-      };
-    });
     apiDataObject.forEach((e) => {
       correctAnswers.push({
         question: e.question.value,
@@ -81,42 +84,34 @@ export default function QuizPage() {
       userAnswers.push({
         question: e.question.value,
         answer: "",
+        isWrong: "",
       });
     });
-    console.log("Correct answers -> 1", correctAnswers);
     function handleClick() {
       compareResult(correctAnswers, userAnswers);
-      console.log(wrongAnswers);
+      console.log(userAnswers);
       setRerender((p) => !p);
     }
     function handleChange(e) {
-      userAnswers.forEach((i) => {
-        if (e.target.name === i.question) {
-          i.answer = e.target.value;
+      userAnswers.forEach((k) => {
+        if (e.target.name === k.question) {
+          k.answer = e.target.value;
         }
       });
     }
-    console.log("rerender");
-
+    console.log("-------------rerender");
     return (
       <div className="container-quiz">
         <ol>
-          {apiDataObject.map((e, i) => (
+          {apiDataObject.map((e, j) => (
             <li>
               <Quiz
                 question={e.question}
                 option={e.option}
+                correct={correctAnswers[j].answer}
                 handleChange={handleChange}
-                wrongAnswers={() => {
-                  if (
-                    wrongAnswers.indexOf(i) !== -1 &&
-                    wrongAnswers.length > 0
-                  ) {
-                    return userAnswers[i];
-                  } else {
-                    return "";
-                  }
-                }}
+                answer={userAnswers[j].answer}
+                isWrong={userAnswers[j].isWrong}
               />
             </li>
           ))}

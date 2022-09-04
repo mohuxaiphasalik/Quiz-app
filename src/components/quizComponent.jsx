@@ -1,5 +1,17 @@
 import React from "react";
 export default function Quiz(props) {
+  function isWrong(isWrong, answer) {
+    if (isWrong === true) {
+      if (answer === props.correct) {
+        return "label isWrong rightAnswer";
+      } else {
+        return "label isWrong";
+      }
+    } else if (isWrong === false) {
+      return "label isRight";
+    }
+    return "label";
+  }
   return (
     <div className="quiz" id={props.question.id}>
       <h3 className="question">{props.question.value}</h3>
@@ -12,7 +24,10 @@ export default function Quiz(props) {
           value={props.option[0].value}
           onChange={props.handleChange}
         />
-        <label className="label" htmlFor={props.option[0].id}>
+        <label
+          className={isWrong(props.isWrong, props.option[0].value)}
+          htmlFor={props.option[0].id}
+        >
           {props.option[0].value}
         </label>
         <input
@@ -23,7 +38,10 @@ export default function Quiz(props) {
           value={props.option[1].value}
           onChange={props.handleChange}
         />
-        <label className="label" htmlFor={props.option[1].id}>
+        <label
+          className={isWrong(props.isWrong, props.option[1].value)}
+          htmlFor={props.option[1].id}
+        >
           {props.option[1].value}
         </label>
         <input
@@ -34,7 +52,10 @@ export default function Quiz(props) {
           value={props.option[2].value}
           onChange={props.handleChange}
         />
-        <label className="label" htmlFor={props.option[2].id}>
+        <label
+          className={isWrong(props.isWrong, props.option[2].value)}
+          htmlFor={props.option[2].id}
+        >
           {props.option[2].value}
         </label>
         <input
@@ -45,11 +66,17 @@ export default function Quiz(props) {
           value={props.option[3].value}
           onChange={props.handleChange}
         />
-        <label className="label" htmlFor={props.option[3].id}>
+        <label
+          className={isWrong(props.isWrong, props.option[3].value)}
+          htmlFor={props.option[3].id}
+        >
           {props.option[3].value}
         </label>
       </div>
-      <h1>{props.wrongAnswers}</h1>
+      <h2>
+        {props.correct}
+        <br />
+      </h2>
     </div>
   );
 }

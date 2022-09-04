@@ -143,3 +143,23 @@ input[type="radio"]:checked + .label {
 }
 
 /* Conditional classes  */
+input[type="radio"]:checked + .isWrong {
+  background-color: rgb(185, 82, 82);
+  border: 2px solid rgb(185, 82, 82);
+  color: white;
+}
+input[type="radio"]:checked + .isRight {
+  background-color: rgb(116, 185, 82);
+  border: 2px solid rgb(116, 185, 82);
+  color: white;
+}
+.rightAnswer {
+  background-color: rgb(116, 185, 82);
+  border: 2px solid rgb(116, 185, 82);
+  color: white;
+}
+.rightAnswer::after {
+  content: "✔️";
+  width: 10px;
+  height: 10px;
+}
