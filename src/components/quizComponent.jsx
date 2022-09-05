@@ -73,10 +73,6 @@ export default function Quiz(props) {
           {props.option[3].value}
         </label>
       </div>
-      <h2>
-        {props.correct}
-        <br />
-      </h2>
     </div>
   );
 }

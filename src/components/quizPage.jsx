@@ -23,6 +23,10 @@ let userAnswers = [];
 export default function QuizPage() {
   const [apiData, setApiData] = React.useState({});
   const [rerender, setRerender] = React.useState(false);
+
+  const [newStart, setNewStart] = React.useState(false);
+
+  const [newGame, setNewGame] = React.useState(false);
   React.useEffect(() => {
     userAnswers = [];
     correctAnswers = [];
@@ -65,7 +69,7 @@ export default function QuizPage() {
 
         setApiData(res.data);
       });
-  }, []);
+  }, [newStart]);
   function compareResult() {
     correctAnswers.forEach((e, i) => {
       if (e.answer !== userAnswers[i].answer) {
@@ -88,9 +92,15 @@ export default function QuizPage() {
       });
     });
     function handleClick() {
-      compareResult(correctAnswers, userAnswers);
-      console.log(userAnswers);
-      setRerender((p) => !p);
+      if (!newGame) {
+        compareResult(correctAnswers, userAnswers);
+        console.log(userAnswers);
+        setRerender((p) => !p);
+        setNewGame(true);
+      } else {
+        setNewGame(false);
+        setNewStart((p) => !p);
+      }
     }
     function handleChange(e) {
       userAnswers.forEach((k) => {
@@ -116,8 +126,12 @@ export default function QuizPage() {
             </li>
           ))}
         </ol>
-        <button className="checkAnswer" onClick={handleClick}>
-          Submit Your Answers
+        <button
+          value={newGame}
+          className={newGame ? "checkAnswer newGame" : "checkAnswer"}
+          onClick={handleClick}
+        >
+          {newGame ? "New Game" : "Submit Your Answers"}
         </button>
       </div>
     );
